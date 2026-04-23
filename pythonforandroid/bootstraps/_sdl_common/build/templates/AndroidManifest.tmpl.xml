@@ -143,8 +143,8 @@
     <activity android:name="{{ a }}"></activity>
     {% endfor %}
 
-  <activity android:name="org.huxtech.client.ClientActivity"
-         android:process=":client_process"
+  <activity android:name="org.kivy.remoteactivity.RemoteActivity"
+         android:process=":remote_process"
          android:launchMode="singleTask"
          android:exported="false"
          android:screenOrientation="portrait" />
