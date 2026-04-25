@@ -147,7 +147,7 @@
          android:process=":remote_process"
          android:launchMode="singleTask"
          android:exported="false"
-         android:screenOrientation="portrait" />
+         android:screenOrientation="unspecified" />
     </application>
 
 </manifest>
