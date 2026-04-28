@@ -138,6 +138,13 @@
     {% for a in args.add_activity  %}
     <activity android:name="{{ a }}"></activity>
     {% endfor %}
+
+   <activity android:name="org.kivy.remoteactivity.RemoteActivity"
+         android:process=":remote_process"
+         android:launchMode="singleTask"
+         android:exported="false"
+         android:configChanges="orientation|screenSize|keyboard|keyboardHidden|navigation|touchscreen|locale|mnc|mcc|screenLayout|fontScale"
+         android:screenOrientation="unspecified" />
     </application>
 
 </manifest>
