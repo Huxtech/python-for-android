@@ -33,6 +33,10 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.content.res.Resources.NotFoundException;
 
+import androidx.core.view.WindowCompat;
+import org.kivy.display.StatusBar;
+import org.kivy.display.NavBar;
+
 import org.libsdl.app.SDLActivity;
 
 import org.kivy.android.launcher.Project;
@@ -60,6 +64,9 @@ public class PythonActivity extends SDLActivity {
         resourceManager = new ResourceManager(this);
 
         Log.v(TAG, "About to do super onCreate");
+		WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        StatusBar.changeStatusBarColor(this, "#00000000", "black");
+        NavBar.changeNavBarColor(this, "#00000000", "black");
         super.onCreate(savedInstanceState);
         Log.v(TAG, "Did super onCreate");
 
@@ -399,7 +406,7 @@ public class PythonActivity extends SDLActivity {
                         }
                     };
                     loadingScreenRemovalTimer = new Timer();
-                    loadingScreenRemovalTimer.schedule(removalTask, 5000);
+                    loadingScreenRemovalTimer.schedule(removalTask, 10000);
                 }
             }
         });
