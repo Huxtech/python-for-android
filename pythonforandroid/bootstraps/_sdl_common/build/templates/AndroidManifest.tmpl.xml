@@ -74,7 +74,6 @@
                   android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|fontScale|uiMode{% if args.min_sdk_version >= 8 %}|uiMode{% endif %}{% if args.min_sdk_version >= 13 %}|screenSize|smallestScreenSize{% endif %}{% if args.min_sdk_version >= 17 %}|layoutDirection{% endif %}{% if args.min_sdk_version >= 24 %}|density{% endif %}"
                   android:screenOrientation="{{ args.manifest_orientation }}"
                   android:exported="true"
-                  android:theme="@style/KivySupportCutout"
                   {% if args.activity_launch_mode %}
                   android:launchMode="{{ args.activity_launch_mode }}"
                   {% endif %}
@@ -147,23 +146,16 @@
     <activity android:name="{{ a }}"></activity>
     {% endfor %}
 
-
-      <activity
-            android:name=".MainActivity"
-            android:screenOrientation="unspecified"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:exported="true">
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <activity android:name="org.kivy.android.PythonActivity"
+         android:process=":python_process"
+         android:launchMode="singleTask"
+         android:exported="false"
+         android:configChanges="orientation|screenSize|keyboard|keyboardHidden|navigation|touchscreen|locale|mnc|mcc|screenLayout|fontScale"
+         android:screenOrientation="unspecified" />
 
 
      <activity
-            android:name=".ScannerActivity"
+            android:name="org.kivy.ScannerActivity"
             android:screenOrientation="unspecified"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
