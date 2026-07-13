@@ -35,6 +35,16 @@ import org.kivy.android.launcher.Project;
 import org.libsdl.app.SDLActivity;
 import org.renpy.android.ResourceManager;
 
+// Kivydevclient
+import java.lang.System;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import android.view.LayoutInflater;
+import android.widget.Button;
+
 import org.kivydevclient.kivydevclient.R;
 import org.kivydevclient.kivydevclient.ServiceSocket;
 import org.kivy.VibraTion;
