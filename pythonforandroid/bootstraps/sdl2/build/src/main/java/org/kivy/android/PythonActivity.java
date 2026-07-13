@@ -35,6 +35,10 @@ import org.kivy.android.launcher.Project;
 import org.libsdl.app.SDLActivity;
 import org.renpy.android.ResourceManager;
 
+import org.kivydevclient.kivydevclient.R;
+import org.kivydevclient.kivydevclient.ServiceSocket;
+import org.kivy.VibraTion;
+
 public class PythonActivity extends SDLActivity {
     private static final String TAG = "PythonActivity";
 
@@ -43,6 +47,12 @@ public class PythonActivity extends SDLActivity {
     private ResourceManager resourceManager = null;
     private Bundle mMetaData = null;
     private PowerManager.WakeLock mWakeLock = null;
+
+    // ✅ ADDED: Shake detection variables
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private static final float SHAKE_THRESHOLD = 12.0f;
+    private long lastShakeTime = 0;
 
     public String getAppRoot() {
         String app_root = getFilesDir().getAbsolutePath() + "/app";
@@ -59,8 +69,14 @@ public class PythonActivity extends SDLActivity {
         Log.v(TAG, "Did super onCreate");
 
         this.mActivity = this;
+        
+        // ✅ ADDED: Initialize sensor
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
+        
         this.showLoadingScreen(this.getLoadingScreen());
-
         new UnpackFilesTask().execute(getAppRoot());
     }
 
@@ -534,6 +550,7 @@ public class PythonActivity extends SDLActivity {
             // Catch pause while still in loading screen failing to
             // call native function (since it's not yet loaded)
         }
+        setOnPause();
     }
 
     @Override
@@ -549,6 +566,7 @@ public class PythonActivity extends SDLActivity {
             // call native function (since it's not yet loaded)
         }
         considerLoadingScreenRemoval();
+        setOnResume();
     }
 
     @Override
@@ -627,6 +645,83 @@ public class PythonActivity extends SDLActivity {
                     (InputMethodManager)
                             getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.restartInput(mTextEdit);
+        }
+    }
+
+    // ############################################################################
+    // ############################################################################
+
+    // ✅ ADDED: Register sensor
+    private void setOnResume() {
+        if (sensorManager != null && accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        }
+    }
+
+    // ✅ ADDED: Unregister sensor
+    private void setOnPause() {
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(this);
+        }
+    }
+
+    // ✅ ADDED: Shake detection logic
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float x = event.values[0];
+        float y = event.values[1];
+        float z = event.values[2];
+
+        float acceleration = (float) Math.sqrt(x * x + y * y + z * z);
+
+        if (acceleration > SHAKE_THRESHOLD) {
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - lastShakeTime > 3000) {
+                lastShakeTime = currentTime;
+                Log.d(TAG, "Device shaken!");
+                VibraTion vibrator = new VibraTion();
+                long[] wavespattern = {0, 100, 150, 100};
+                vibrator.waves(getApplicationContext(), wavespattern);
+                showBottomMenu();
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+
+    // ✅ ADDED: Bottom menu
+    private void showBottomMenu() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+
+        View view = LayoutInflater.from(this).inflate(
+                R.layout.bottom_menu, null);
+
+        Button exitButton = view.findViewById(R.id.exit_button);
+
+        exitButton.setOnClickListener(v -> {
+            stopSocketService(); // stops the background service
+            dialog.dismiss();
+            finish(); // exits remote activity, returning to main app
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
+    private void stopSocketService() {
+        Context context = getApplicationContext();
+
+        String packageName = context.getPackageName();
+        String serviceName = packageName + ".ServiceSocket";
+
+        try {
+            Class<?> serviceClass = Class.forName(serviceName);
+            Intent intent = new Intent(context, serviceClass); // ✅ use context
+            context.stopService(intent); // ✅ use context
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "Service class not found: " + serviceName, e);
         }
     }
 }
