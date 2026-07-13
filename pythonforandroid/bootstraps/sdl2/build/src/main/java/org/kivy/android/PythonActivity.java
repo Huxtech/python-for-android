@@ -49,7 +49,7 @@ import org.kivydevclient.kivydevclient.R;
 import org.kivydevclient.kivydevclient.ServiceSocket;
 import org.kivy.VibraTion;
 
-public class PythonActivity extends SDLActivity {
+public class PythonActivity extends SDLActivity implements SensorEventListener {
     private static final String TAG = "PythonActivity";
 
     public static PythonActivity mActivity = null;
