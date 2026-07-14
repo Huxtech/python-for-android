@@ -734,4 +734,14 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
             Log.e(TAG, "Service class not found: " + serviceName, e);
         }
     }
+
+    public void restartSimulatedAppActivity() {
+        Intent intent = getIntent();
+        Log.d(TAG, intent.toString());
+        // intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        // finish();
+        System.exit(0);
+    }
 }
