@@ -45,6 +45,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import android.view.LayoutInflater;
 import android.widget.Button;
 
+import androidx.core.view.WindowCompat;
+import org.kivy.StatusBar;
+import org.kivy.NavBar;
+
 import org.kivydevclient.kivydevclient.R;
 import org.kivydevclient.kivydevclient.ServiceSocket;
 import org.kivy.VibraTion;
@@ -77,6 +81,23 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
         Log.v(TAG, "About to do super onCreate");
         super.onCreate(savedInstanceState);
         Log.v(TAG, "Did super onCreate");
+
+        Intent intent = getIntent();
+        boolean edge_to_edge = intent.getBooleanExtra("edge_to_edge", false);
+        String nav_status_bar_style = intent.getStringExtra("nav_status_bar_style");
+        if (edge_to_edge) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        }
+        if ("navStaLight".equals(nav_status_bar_style)) {
+            StatusBar.changeStatusBarColor(this, "#00000000", "white");
+            NavBar.changeNavBarColor(this, "#00000000", "white");
+        }else if ("navStaDark".equals(nav_status_bar_style)) {
+            StatusBar.changeStatusBarColor(this, "#00000000", "black");
+            NavBar.changeNavBarColor(this, "#00000000", "black");
+        }else {
+            StatusBar.changeStatusBarColor(this, "#000000", "white");
+            NavBar.changeNavBarColor(this, "#000000", "white");
+        }
 
         this.mActivity = this;
         
