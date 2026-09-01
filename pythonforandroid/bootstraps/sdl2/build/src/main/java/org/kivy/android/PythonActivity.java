@@ -37,10 +37,6 @@ import org.renpy.android.ResourceManager;
 
 // Kivydevclient
 import java.lang.System;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import android.view.LayoutInflater;
 import android.widget.Button;
@@ -48,12 +44,12 @@ import android.widget.Button;
 import androidx.core.view.WindowCompat;
 import org.kivy.StatusBar;
 import org.kivy.NavBar;
-
 import org.kivydevclient.kivydevclient.R;
+import org.kivy.FloatingIconButton;
 import org.kivydevclient.kivydevclient.ServiceSocket;
 import org.kivy.VibraTion;
 
-public class PythonActivity extends SDLActivity implements SensorEventListener {
+public class PythonActivity extends SDLActivity {
     private static final String TAG = "PythonActivity";
 
     public static PythonActivity mActivity = null;
@@ -62,11 +58,8 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
     private Bundle mMetaData = null;
     private PowerManager.WakeLock mWakeLock = null;
 
-    // ✅ ADDED: Shake detection variables
-    private SensorManager sensorManager;
-    private Sensor accelerometer;
-    private static final float SHAKE_THRESHOLD = 12.0f;
-    private long lastShakeTime = 0;
+    private FloatingIconButton floatingButton;
+
 
     public String getAppRoot() {
         String app_root = getFilesDir().getAbsolutePath() + "/app";
@@ -99,13 +92,24 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
             NavBar.changeNavBarColor(this, "#000000", "white");
         }
 
+        // Setup Float icon button
+        floatingButton = new FloatingIconButton(this);
+        floatingButton.setButtonSize(56);
+        floatingButton.setEdgeMargin(6);
+        floatingButton.setSnapAnimationDuration(180);
+
+        floatingButton.setOnClickListener(() -> {
+            VibraTion vibrator = new VibraTion();
+            vibrator.vibrate(getApplicationContext(), 80);
+            showBottomMenu();
+        });
+
+        floatingButton.show(
+                R.drawable.baseline_settings_24
+        );
+
         this.mActivity = this;
         
-        // ✅ ADDED: Initialize sensor
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (sensorManager != null) {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        }
         
         this.showLoadingScreen(this.getLoadingScreen());
         new UnpackFilesTask().execute(getAppRoot());
@@ -581,7 +585,6 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
             // Catch pause while still in loading screen failing to
             // call native function (since it's not yet loaded)
         }
-        setOnPause();
     }
 
     @Override
@@ -597,7 +600,6 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
             // call native function (since it's not yet loaded)
         }
         considerLoadingScreenRemoval();
-        setOnResume();
     }
 
     @Override
@@ -681,46 +683,6 @@ public class PythonActivity extends SDLActivity implements SensorEventListener {
 
     // ############################################################################
     // ############################################################################
-
-    // ✅ ADDED: Register sensor
-    private void setOnResume() {
-        if (sensorManager != null && accelerometer != null) {
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        }
-    }
-
-    // ✅ ADDED: Unregister sensor
-    private void setOnPause() {
-        if (sensorManager != null) {
-            sensorManager.unregisterListener(this);
-        }
-    }
-
-    // ✅ ADDED: Shake detection logic
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float x = event.values[0];
-        float y = event.values[1];
-        float z = event.values[2];
-
-        float acceleration = (float) Math.sqrt(x * x + y * y + z * z);
-
-        if (acceleration > SHAKE_THRESHOLD) {
-            long currentTime = System.currentTimeMillis();
-
-            if (currentTime - lastShakeTime > 3000) {
-                lastShakeTime = currentTime;
-                Log.d(TAG, "Device shaken!");
-                VibraTion vibrator = new VibraTion();
-                long[] wavespattern = {0, 100, 150, 100};
-                vibrator.waves(getApplicationContext(), wavespattern);
-                showBottomMenu();
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     // ✅ ADDED: Bottom menu
     private void showBottomMenu() {
