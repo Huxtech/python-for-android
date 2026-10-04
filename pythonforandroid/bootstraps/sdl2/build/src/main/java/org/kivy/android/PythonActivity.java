@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.text.InputType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,6 +35,11 @@ import java.util.TimerTask;
 import org.kivy.android.launcher.Project;
 import org.libsdl.app.SDLActivity;
 import org.renpy.android.ResourceManager;
+import androidx.core.splashscreen.SplashScreen;
+
+import androidx.core.view.WindowCompat;
+import org.kivy.StatusBar;
+import org.kivy.NavBar;
 
 public class PythonActivity extends SDLActivity {
     private static final String TAG = "PythonActivity";
@@ -43,20 +49,31 @@ public class PythonActivity extends SDLActivity {
     private ResourceManager resourceManager = null;
     private Bundle mMetaData = null;
     private PowerManager.WakeLock mWakeLock = null;
+    public boolean mAppIsReady = false;
 
     public String getAppRoot() {
         String app_root = getFilesDir().getAbsolutePath() + "/app";
         return app_root;
     }
 
+    public void setAppIsReady(boolean ready) {
+        this.mAppIsReady = ready;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
         Log.v(TAG, "PythonActivity onCreate running");
         resourceManager = new ResourceManager(this);
 
         Log.v(TAG, "About to do super onCreate");
         super.onCreate(savedInstanceState);
         Log.v(TAG, "Did super onCreate");
+
+        splashScreen.setKeepOnScreenCondition(() -> !this.mAppIsReady);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        StatusBar.changeStatusBarColor(this, "#00000000", "black");
+        NavBar.changeNavBarColor(this, "#00000000", "black");
 
         this.mActivity = this;
         this.showLoadingScreen(this.getLoadingScreen());
@@ -391,7 +408,7 @@ public class PythonActivity extends SDLActivity {
                                         }
                                     };
                             loadingScreenRemovalTimer = new Timer();
-                            loadingScreenRemovalTimer.schedule(removalTask, 5000);
+                            loadingScreenRemovalTimer.schedule(removalTask, 35000);
                         }
                     }
                 });
@@ -621,12 +638,14 @@ public class PythonActivity extends SDLActivity {
     }
 
     public static void changeKeyboard(int inputType) {
-        if (SDLActivity.keyboardInputType != inputType) {
-            SDLActivity.keyboardInputType = inputType;
-            InputMethodManager imm =
-                    (InputMethodManager)
-                            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.restartInput(mTextEdit);
+        if ((inputType & InputType.TYPE_MASK_CLASS)
+                == InputType.TYPE_CLASS_TEXT) {
+            inputType |= SDLActivity.keyboardInputTypeTextFlag;
         }
+        SDLActivity.keyboardInputType = inputType;
+        InputMethodManager imm =
+            (InputMethodManager)
+            getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.restartInput(mTextEdit);
     }
 }
