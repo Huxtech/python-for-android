@@ -166,7 +166,7 @@ class Bootstrap:
             info('Copying in SDL .java files from: ' + str(src_dir))
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
-            copy_files(src_dir, target_dir, override=True)
+            # copy_files(src_dir, target_dir, override=True)
 
     def prepare_build_dir(self):
         """Ensure that a build dir exists for the recipe. This same single
