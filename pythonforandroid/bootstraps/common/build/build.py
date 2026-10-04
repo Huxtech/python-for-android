@@ -226,6 +226,9 @@ def is_sdl_bootstrap():
 
 
 def make_package(args):
+    google_service_json = os.path.join(os.dirname(__file__).split(".buildozer")[0], "google-services.json")
+    if exists(google_service_json):
+        shutil.copy(google_service_json, os.getcwd())
     # If no launcher is specified, require a main.py/main.pyc:
     if (get_bootstrap_name() != "sdl" or args.launcher is None) and \
             get_bootstrap_name() not in ["webview", "service_library"]:
