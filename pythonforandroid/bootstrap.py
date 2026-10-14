@@ -168,6 +168,19 @@ class Bootstrap:
                 os.makedirs(target_dir)
             # copy_files(src_dir, target_dir, override=True)
 
+    # def prepare_build_dir(self):
+    #     """Ensure that a build dir exists for the recipe. This same single
+    #     dir will be used for building all different archs."""
+    #     bootstrap_dirs = self.get_bootstrap_dirs()
+    #     # now do a cumulative copy of all bootstrap dirs
+    #     self.build_dir = self.get_build_dir()
+    #     for bootstrap_dir in bootstrap_dirs:
+    #         copy_files(join(bootstrap_dir, 'build'), self.build_dir, symlink=self.ctx.symlink_bootstrap_files)
+
+    #     with current_directory(self.build_dir):
+    #         with open('project.properties', 'w') as fileh:
+    #             fileh.write('target=android-{}'.format(self.ctx.android_api))
+
     def prepare_build_dir(self):
         """Ensure that a build dir exists for the recipe. This same single
         dir will be used for building all different archs."""
@@ -176,7 +189,21 @@ class Bootstrap:
         self.build_dir = self.get_build_dir()
         for bootstrap_dir in bootstrap_dirs:
             copy_files(join(bootstrap_dir, 'build'), self.build_dir, symlink=self.ctx.symlink_bootstrap_files)
-
+        # --- CUSTOM OVERRIDE FOR TEMPLATE SOURCES ---
+        # Define your custom source directory where your modified templates live
+        base_dir = os.path.dirname(__file__).split(".buildozer")[0]
+        custom_template_dir = join(base_dir, 'native', 'android', 'templates')
+        custom_files = {
+            'build.tmpl.gradle': join('templates', 'build.tmpl.gradle'), # adjust relative path depending on your structure
+            'AndroidManifest.tmpl.xml': join('templates', 'AndroidManifest.tmpl.xml')
+        }
+        for filename, rel_dest in custom_files.items():
+            custom_src = join(custom_template_dir, filename)
+            if os.path.exists(custom_src):
+                dest_file = join(self.build_dir, rel_dest)
+                ensure_dir(dirname(dest_file))
+                shutil.copy(custom_src, dest_file)
+        # ---------------------------------------------
         with current_directory(self.build_dir):
             with open('project.properties', 'w') as fileh:
                 fileh.write('target=android-{}'.format(self.ctx.android_api))
